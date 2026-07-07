@@ -13,6 +13,7 @@ import Bracket from "../components/Bracket";
 import Calibration from "../components/Calibration";
 import ChampionOdds from "../components/ChampionOdds";
 import StrengthTable from "../components/StrengthTable";
+import TopScorers from "../components/TopScorers";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -64,7 +65,7 @@ export default function Page() {
       }
     } catch (e: any) {
       setError(
-        `No se pudo conectar con el backend (${e?.message ?? e}). ¿Está corriendo en el puerto 8000?`
+        `No se pudo conectar con el backend (${e?.message ?? e}). Â¿EstÃ¡ corriendo en el puerto 8000?`
       );
     }
   }, [nSims, mode]);
@@ -78,13 +79,13 @@ export default function Page() {
     setCalibBusy(true);
     try {
       const res = await recalibrate(1.0);
-      // animar la precisión subiendo según el historial de aprendizaje
+      // animar la precisiÃ³n subiendo segÃºn el historial de aprendizaje
       for (const acc of res.history) {
         setCalibPct(acc * 100);
         await sleep(140);
       }
       setCalibPct(res.accuracy * 100);
-      // recargar el modelo ya ajustado (predicciones y simulación cambian)
+      // recargar el modelo ya ajustado (predicciones y simulaciÃ³n cambian)
       await load();
     } catch {
       /* noop */
@@ -114,15 +115,24 @@ export default function Page() {
 
     const pt = playTournament(ov.matches, ov.strengths, mode === "live");
     ptRef.current = pt;
-    setTotal(pt.order.length);
+
+    // Los partidos ya jugados se muestran de una en el cuadro (no se pelean).
+    // Solo se anima la lucha de los que faltan por jugar.
+    pt.order.forEach((pm) => {
+      if (!pm.live) acc.set(pm.id, pm);
+    });
+    setPlayed(new Map(acc));
+
+    const live = pt.order.filter((pm) => pm.live);
+    setTotal(live.length);
 
     const fightMs = fast ? 1000 : 2000;
     const decideMs = fast ? 650 : 1150;
     setFightDur(fightMs);
 
-    for (let i = 0; i < pt.order.length; i++) {
+    for (let i = 0; i < live.length; i++) {
       if (abort.current) break;
-      const pm = pt.order[i];
+      const pm = live[i];
       setCurrent(pm);
       setMatchIndex(i);
       setPhase("fighting");
@@ -143,7 +153,7 @@ export default function Page() {
     setRunning(false);
   };
 
-  // Termina instantáneamente la corrida en curso (o genera una si no hay).
+  // Termina instantÃ¡neamente la corrida en curso (o genera una si no hay).
   const skip = () => {
     if (!ov) return;
     abort.current = true;
@@ -171,7 +181,7 @@ export default function Page() {
         </h1>
         <p>
           Desde octavos. Fuerza real por Elo de resultados, con lesiones,
-          cansancio, forma y moral calculada. Simulación Monte Carlo y batallas
+          cansancio, forma y moral calculada. SimulaciÃ³n Monte Carlo y batallas
           animadas partido a partido.
         </p>
         {ov && (
@@ -179,7 +189,7 @@ export default function Page() {
             {ov.meta.data_source === "api" ? "Datos reales en vivo" : "datos de ejemplo"}
             {ov.meta.updated_ts > 0 && (
               <span className="upd">
-                · act. {new Date(ov.meta.updated_ts * 1000).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })}
+                Â· act. {new Date(ov.meta.updated_ts * 1000).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })}
               </span>
             )}
           </span>
@@ -188,13 +198,13 @@ export default function Page() {
 
       {error && <div className="error">{error}</div>}
 
-      {!ov && !error && <div className="loading">Cargando datos del Mundial…</div>}
+      {!ov && !error && <div className="loading">Cargando datos del Mundialâ€¦</div>}
 
       {ov && (
         <>
           <div className="controls">
             <button className="btn" onClick={simulate} disabled={running}>
-              {running ? "Simulando…" : "Simular torneo"}
+              {running ? "Simulandoâ€¦" : "Simular torneo"}
             </button>
             <button className="btn ghost" onClick={skip} disabled={!running}>
               Saltar al final
@@ -207,7 +217,7 @@ export default function Page() {
               onClick={refreshData}
               disabled={refreshing || running}
             >
-              {refreshing ? "Actualizando…" : "↻ Actualizar datos"}
+              {refreshing ? "Actualizandoâ€¦" : "â†» Actualizar datos"}
             </button>
 
             <label className="toggle">
@@ -225,7 +235,7 @@ export default function Page() {
                 checked={fast}
                 onChange={(e) => setFast(e.target.checked)}
               />
-              Rápido
+              RÃ¡pido
             </label>
             <label className="toggle">
               Simulaciones:
@@ -254,7 +264,7 @@ export default function Page() {
           </div>
 
           <div className="section">
-            <h2>Cuadro final · fixtures</h2>
+            <h2>Cuadro final Â· fixtures</h2>
             <Bracket
               matches={ov.matches}
               predictions={ov.predictions}
@@ -264,7 +274,7 @@ export default function Page() {
 
           {ov.calibration?.records?.length > 0 && (
             <div className="section">
-              <h2>Calibración · aciertos sobre lo ya jugado</h2>
+              <h2>CalibraciÃ³n Â· aciertos sobre lo ya jugado</h2>
               <Calibration
                 data={ov.calibration}
                 displayPct={calibPct}
@@ -276,7 +286,7 @@ export default function Page() {
 
           <div className="section grid2">
             <div>
-              <h2>Probabilidad de ser campeón</h2>
+              <h2>Probabilidad de ser campeÃ³n</h2>
               <ChampionOdds data={ov.simulation} />
               <p className="note">
                 Sobre {ov.meta.simulations.toLocaleString("es")} simulaciones Monte
@@ -287,6 +297,17 @@ export default function Page() {
               <h2>Fuerza de cada equipo</h2>
               <StrengthTable data={ov.strengths} />
             </div>
+          </div>
+
+          <div className="section">
+            <h2>Goleadores Â· carrera por la Bota de Oro</h2>
+            <TopScorers data={ov.top_scorers ?? []} />
+            <p className="note">
+              Goles esperados = goles ya hechos + goles futuros previstos (modelo
+              Poisson). Muchos goles van a jugadores no listados: el API no trae
+              planteles, asÃ­ que se estiman con quienes ya marcaron y los de
+              overrides.json.
+            </p>
           </div>
         </>
       )}

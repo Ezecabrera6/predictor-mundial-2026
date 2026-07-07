@@ -1,7 +1,7 @@
-"""Simulación Monte Carlo del cuadro de eliminación directa.
+"""SimulaciÃ³n Monte Carlo del cuadro de eliminaciÃ³n directa.
 
 Respeta los partidos ya jugados (ganador fijo) y simula los pendientes miles de
-veces según la probabilidad de victoria. Cuenta con qué frecuencia cada equipo
+veces segÃºn la probabilidad de victoria. Cuenta con quÃ© frecuencia cada equipo
 llega a cada ronda y gana la copa. Con `replay_from` se pueden "reabrir" rondas
 ya jugadas (ej. simular todo el octavos desde cero).
 """
@@ -46,11 +46,24 @@ def _simulate_once(
         home = _resolve(m.home, winners, losers)
         away = _resolve(m.away, winners, losers)
         if home is None or away is None:
-            continue  # aún no resoluble (no debería pasar con orden correcto)
+            continue  # aÃºn no resoluble (no deberÃ­a pasar con orden correcto)
 
         force_open = _ROUND_ORDER[m.round] >= replay_order
-        if m.finished and m.winner_id and not force_open:
+        if m.finished and not force_open:
+            # Partido ya jugado: se respeta SIEMPRE, nunca se sortea.
             w = m.winner_id
+            if w is None:
+                # Ganador no cargado (p. ej. definido por penales sin dato de
+                # avance): resolver por marcador; si sigue empatado, elecciÃ³n
+                # estable. JamÃ¡s al azar en un partido jugado.
+                if (
+                    m.home_score is not None
+                    and m.away_score is not None
+                    and m.home_score != m.away_score
+                ):
+                    w = home if m.home_score > m.away_score else away
+                else:
+                    w = home
         else:
             p = win_probability(strengths[home], strengths[away])
             w = home if rng.random() < p else away
@@ -67,7 +80,7 @@ def run_simulation(
     strengths = {t.id: compute_strength(t).effective_rating for t in bracket.teams}
     reach = {t.id: {"qf": 0, "sf": 0, "final": 0, "cup": 0} for t in bracket.teams}
 
-    # Mapa ronda de un partido -> a qué "reach" contribuye ganarlo
+    # Mapa ronda de un partido -> a quÃ© "reach" contribuye ganarlo
     reach_key = {"r16": "qf", "qf": "sf", "sf": "final", "final": "cup"}
 
     for _ in range(n):
@@ -101,8 +114,11 @@ def run_simulation(
 
 def predict_known_matches(bracket: Bracket) -> list[MatchPrediction]:
     """Probabilidades de los partidos con ambos rivales ya definidos."""
+    from .goals import expected_goals, likely_scoreline, likely_scorers, real_goals_by_team
+
     strengths = {t.id: compute_strength(t) for t in bracket.teams}
     by_id = {t.id: t for t in bracket.teams}
+    real_by_team = real_goals_by_team(bracket)
     preds: list[MatchPrediction] = []
     for m in _ordered(bracket.matches):
         h = m.home.team_id
@@ -116,6 +132,17 @@ def predict_known_matches(bracket: Bracket) -> list[MatchPrediction]:
             if m.finished and m.home_score is not None
             else None
         )
+        pred_score = None
+        hs_likely: list[str] = []
+        as_likely: list[str] = []
+        if not m.finished:
+            lam_h, lam_a = expected_goals(
+                strengths[h].effective_rating, strengths[a].effective_rating
+            )
+            gh, ga = likely_scoreline(lam_h, lam_a)
+            pred_score = f"{gh}-{ga}"
+            hs_likely = likely_scorers(home, real_by_team, 2)
+            as_likely = likely_scorers(away, real_by_team, 2)
         preds.append(
             MatchPrediction(
                 match_id=m.id,
@@ -129,6 +156,9 @@ def predict_known_matches(bracket: Bracket) -> list[MatchPrediction]:
                 favorite=home.name if p >= 0.5 else away.name,
                 finished=m.finished,
                 played_result=played,
+                pred_score=pred_score,
+                home_scorers_likely=hs_likely,
+                away_scorers_likely=as_likely,
             )
         )
     return preds

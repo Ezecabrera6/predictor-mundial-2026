@@ -1,5 +1,5 @@
-// Simulación de UNA corrida del torneo en el cliente, para animar el bracket
-// partido a partido. Usa las mismas fuerzas efectivas y la logística Elo del
+// SimulaciÃ³n de UNA corrida del torneo en el cliente, para animar el bracket
+// partido a partido. Usa las mismas fuerzas efectivas y la logÃ­stica Elo del
 // backend (elo_scale = 200).
 
 import type { Match, Strength, TeamRef } from "./api";
@@ -24,7 +24,7 @@ export type PlayedMatch = {
   away: TeamRef;
   pHome: number;
   winnerId: number | null;
-  live: boolean; // true = se decidió en esta corrida (no venía jugado)
+  live: boolean; // true = se decidiÃ³ en esta corrida (no venÃ­a jugado)
   score: string | null;
 };
 
@@ -89,9 +89,21 @@ export function playTournament(
 
     let winnerId: number;
     let live = true;
-    if (respectFinished && m.finished && m.winner_id != null) {
-      winnerId = m.winner_id;
+    if (respectFinished && m.finished) {
+      // Partido ya jugado: se respeta SIEMPRE, nunca se sortea.
       live = false;
+      if (m.winner_id != null) {
+        winnerId = m.winner_id;
+      } else {
+        // Ganador no cargado (p. ej. penales): resolver por marcador; si sigue
+        // empatado, elecciÃ³n estable. Nunca al azar en un partido jugado.
+        const p = (m.score ?? "").split("-").map((x) => parseInt(x.trim(), 10));
+        if (p.length === 2 && !Number.isNaN(p[0]) && !Number.isNaN(p[1]) && p[0] !== p[1]) {
+          winnerId = p[0] > p[1] ? homeId : awayId;
+        } else {
+          winnerId = homeId;
+        }
+      }
     } else {
       winnerId = Math.random() < pHome ? homeId : awayId;
     }

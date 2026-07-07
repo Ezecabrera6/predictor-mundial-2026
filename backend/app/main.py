@@ -17,6 +17,7 @@ from .simulation import (
     run_simulation,
     team_strengths,
 )
+from .goals import run_goldenboot
 
 app = FastAPI(title="Predictor Mundial 2026", version=__version__)
 
@@ -31,7 +32,7 @@ _cache: dict = {"bracket": None, "ts": 0.0}
 
 
 def _bracket(refresh: bool = False) -> Bracket:
-    """Devuelve el cuadro cacheado, refrescándolo si venció el TTL o se pide."""
+    """Devuelve el cuadro cacheado, refrescÃ¡ndolo si venciÃ³ el TTL o se pide."""
     age = time.time() - _cache["ts"]
     if refresh or _cache["bracket"] is None or age > settings.cache_ttl:
         try:
@@ -39,7 +40,7 @@ def _bracket(refresh: bool = False) -> Bracket:
             _cache["ts"] = time.time()
         except Exception as e:  # noqa: BLE001
             if _cache["bracket"] is not None:
-                return _cache["bracket"]  # si falla el refresh, servimos lo último
+                return _cache["bracket"]  # si falla el refresh, servimos lo Ãºltimo
             raise HTTPException(status_code=502, detail=f"No se pudo cargar datos: {e}")
     return _cache["bracket"]
 
@@ -106,12 +107,12 @@ def recalibrate(
 ) -> dict:
     """Aprende correcciones de rating por equipo hasta reproducir lo ya jugado.
 
-    Aplica las correcciones al modelo en vivo (afecta predicciones y simulación).
+    Aplica las correcciones al modelo en vivo (afecta predicciones y simulaciÃ³n).
     """
     b = _bracket()
     cal = b.calibration
     if not cal.get("fit_matches"):
-        raise HTTPException(status_code=400, detail="Calibración no disponible (modo sample).")
+        raise HTTPException(status_code=400, detail="CalibraciÃ³n no disponible (modo sample).")
 
     base_value = {int(k): v for k, v in cal["base_value"].items()}
     fit_matches = cal["fit_matches"]
@@ -178,6 +179,15 @@ def simulate(
     return [r.model_dump() for r in run_simulation(b, n, seed=seed, replay_from=replay_from)]
 
 
+@app.get("/api/scorers")
+def scorers(
+    n: int = Query(default=settings.simulations, ge=100, le=200_000),
+    refresh: bool = False,
+) -> list:
+    """Carrera por la Bota de Oro: goles esperados por jugador."""
+    return [s.model_dump() for s in run_goldenboot(_bracket(refresh), n)]
+
+
 @app.get("/api/overview")
 def overview(
     n: int = Query(default=settings.simulations, ge=100, le=200_000),
@@ -201,4 +211,5 @@ def overview(
         "simulation": [
             r.model_dump() for r in run_simulation(b, n, replay_from=replay_from)
         ],
+        "top_scorers": [s.model_dump() for s in run_goldenboot(b, n)],
     }

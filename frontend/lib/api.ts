@@ -1,15 +1,15 @@
 // Tipos y cliente del backend del predictor.
 
 // URL del backend. Prioridad:
-// 1) NEXT_PUBLIC_API_URL si se define (dev).
-// 2) En el navegador, se deriva del host actual -> http://<host>:8000.
-//    Así, entrando desde cualquier IP/dispositivo de la LAN, apunta solo.
-// 3) Fallback local.
+// 1) NEXT_PUBLIC_API_URL si se define (override para dev).
+// 2) En el navegador: MISMO ORIGEN (string vacÃ­o). Las llamadas van a /api/*
+//    y Next las reenvÃ­a al backend (ver rewrites en next.config.mjs). AsÃ­
+//    funciona igual por IP en la LAN, por localhost y detrÃ¡s de un dominio o
+//    tÃºnel, todo bajo un Ãºnico host y sin exponer el puerto 8000.
+// 3) SSR / build: backend local.
 export function apiBase(): string {
   if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
-  if (typeof window !== "undefined") {
-    return `${window.location.protocol}//${window.location.hostname}:8000`;
-  }
+  if (typeof window !== "undefined") return "";
   return "http://127.0.0.1:8000";
 }
 
@@ -63,6 +63,17 @@ export type Prediction = {
   favorite: string;
   finished: boolean;
   played_result: string | null;
+  pred_score?: string | null;
+  home_scorers_likely?: string[];
+  away_scorers_likely?: string[];
+};
+
+export type ScorerRow = {
+  name: string;
+  code: string;
+  team: string;
+  goals_now: number;
+  exp_goals: number;
 };
 
 export type SimResult = {
@@ -111,6 +122,7 @@ export type Overview = {
   strengths: Strength[];
   predictions: Prediction[];
   simulation: SimResult[];
+  top_scorers: ScorerRow[];
 };
 
 export async function fetchOverview(

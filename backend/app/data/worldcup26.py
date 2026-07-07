@@ -1,7 +1,7 @@
 """Proveedor de datos real: API worldcup26.ir.
 
 Trae equipos y partidos reales, calcula el Elo desde los resultados jugados,
-deriva fatiga y forma del calendario, arma el cuadro de octavos→final y le
+deriva fatiga y forma del calendario, arma el cuadro de octavosâ†’final y le
 inyecta la capa manual de lesiones/moral (overrides.json).
 """
 
@@ -40,13 +40,13 @@ def _to_int(v) -> int | None:
 
 
 def _parse_scorers(raw) -> list[str]:
-    """Convierte '{"J. Quiñones 9\'","R. Jiménez 67\'"}' en lista de goleadores."""
+    """Convierte '{"J. QuiÃ±ones 9\'","R. JimÃ©nez 67\'"}' en lista de goleadores."""
     if not raw or str(raw).strip().lower() in ("null", "{}", ""):
         return []
     s = str(raw)
     for ch in "{}":
         s = s.replace(ch, "")
-    for q in ("“", "”", "“", "”", '"', "'"):
+    for q in ("â€œ", "â€", "â€œ", "â€", '"', "'"):
         s = s.replace(q, "")
     parts = [p.strip() for p in s.split(",")]
     return [p for p in parts if p and p.lower() != "null"]
@@ -60,7 +60,7 @@ def _fmt_scorers(home_raw, home_code, away_raw, away_code) -> str:
         chunks.append(f"{home_code}: " + ", ".join(h))
     if a:
         chunks.append(f"{away_code}: " + ", ".join(a))
-    return " · ".join(chunks)
+    return " Â· ".join(chunks)
 
 
 class ApiError(RuntimeError):
@@ -94,7 +94,7 @@ class WorldCup26Provider(DataProvider):
             return False
 
     def _login(self) -> str:
-        """Autentica (o registra) y devuelve un token válido, cacheándolo."""
+        """Autentica (o registra) y devuelve un token vÃ¡lido, cacheÃ¡ndolo."""
         cached = self._cached_token()
         if cached and self._token_valid(cached):
             return cached
@@ -119,7 +119,7 @@ class WorldCup26Provider(DataProvider):
                 },
             )
         if r.status_code != 200:
-            raise ApiError(f"Login/registro falló ({r.status_code}): {r.text[:200]}")
+            raise ApiError(f"Login/registro fallÃ³ ({r.status_code}): {r.text[:200]}")
         token = r.json().get("token")
         if not token:
             raise ApiError("La respuesta de auth no trae token.")
@@ -131,7 +131,7 @@ class WorldCup26Provider(DataProvider):
             f"{self.base}{path}", headers={"Authorization": f"Bearer {token}"}
         )
         if r.status_code != 200:
-            raise ApiError(f"GET {path} falló ({r.status_code})")
+            raise ApiError(f"GET {path} fallÃ³ ({r.status_code})")
         return r.json()
 
     # ---- Overrides manuales (lesiones / moral) ----
@@ -141,7 +141,7 @@ class WorldCup26Provider(DataProvider):
             return {}
         return json.load(p.open(encoding="utf-8"))
 
-    # ---- Construcción del bracket ----
+    # ---- ConstrucciÃ³n del bracket ----
     def get_bracket(self) -> Bracket:
         token = self._login()
         teams_raw = self._get("/get/teams", token)["teams"]
@@ -150,7 +150,7 @@ class WorldCup26Provider(DataProvider):
 
         team_by_id = {int(t["id"]): t for t in teams_raw}
 
-        # Ordenar partidos cronológicamente (por ronda y fecha)
+        # Ordenar partidos cronolÃ³gicamente (por ronda y fecha)
         def sort_key(g):
             d = _parse_date(g.get("local_date", "")) or datetime.max
             return (_ROUND_ORDER.get(g.get("type"), 9), d)
@@ -163,8 +163,8 @@ class WorldCup26Provider(DataProvider):
             int(t["id"]) for t in teams_raw if t.get("fifa_code") in _HOSTS
         }
 
-        # --- Calibración: ajustar parámetros con los partidos ya jugados ---
-        # Orden en que cada equipo reaparece (para saber quién avanzó en empates
+        # --- CalibraciÃ³n: ajustar parÃ¡metros con los partidos ya jugados ---
+        # Orden en que cada equipo reaparece (para saber quiÃ©n avanzÃ³ en empates
         # definidos por penales).
         appears_order: dict[int, int] = {}
         for g in games:
@@ -185,7 +185,7 @@ class WorldCup26Provider(DataProvider):
             if typ in {"r32", "r16", "qf", "sf", "final"}:
                 if hs != as_:
                     advancer = h if hs > as_ else a
-                else:  # empate → avanzó el que reaparece en ronda posterior
+                else:  # empate â†’ avanzÃ³ el que reaparece en ronda posterior
                     for tid in (h, a):
                         if appears_order.get(tid, 0) > order:
                             advancer = tid
@@ -224,7 +224,7 @@ class WorldCup26Provider(DataProvider):
         last_played: dict[int, datetime] = {}
         matches_30: dict[int, int] = {}
         form: dict[int, list[str]] = {}
-        goals: dict[int, list[tuple[int, int]]] = {}  # (gf, ga) cronológico → moral
+        goals: dict[int, list[tuple[int, int]]] = {}  # (gf, ga) cronolÃ³gico â†’ moral
         for g in finished:
             d = _parse_date(g.get("local_date", ""))
             if d is None:
@@ -243,7 +243,7 @@ class WorldCup26Provider(DataProvider):
                     form.setdefault(tid, []).append(res)
                     goals.setdefault(tid, []).append((gf, ga))
 
-        # Próximo partido programado por equipo (para días de descanso)
+        # PrÃ³ximo partido programado por equipo (para dÃ­as de descanso)
         next_date: dict[int, datetime] = {}
         for g in games:
             if str(g.get("finished")).upper() == "TRUE":
@@ -292,7 +292,7 @@ class WorldCup26Provider(DataProvider):
                 )
             )
 
-        # --- Calibración inicial: qué tan bien reproduce lo ya jugado ---
+        # --- CalibraciÃ³n inicial: quÃ© tan bien reproduce lo ya jugado ---
         # Valor por equipo = Elo base (para TODOS los equipos, incluidos los ya
         # eliminados que aparecen en partidos pasados).
         base_value = {
@@ -343,10 +343,18 @@ class WorldCup26Provider(DataProvider):
             if fin and home.team_id and away.team_id:
                 if hs is not None and as_ is not None and hs != as_:
                     winner = home.team_id if hs > as_ else away.team_id
-                else:  # empate → avanzó el que reaparece en ronda posterior
-                    for tid in (home.team_id, away.team_id):
-                        if appears_later.get(tid, 0) > order:
-                            winner = tid
+                else:  # empate â†’ definido por penales
+                    # 1) ganador / penales explÃ­citos si el API los trae
+                    wexp = _to_int(g.get("winner_team_id")) or _to_int(g.get("winner_id"))
+                    hp, ap = _to_int(g.get("home_penalties")), _to_int(g.get("away_penalties"))
+                    if wexp in (home.team_id, away.team_id):
+                        winner = wexp
+                    elif hp is not None and ap is not None and hp != ap:
+                        winner = home.team_id if hp > ap else away.team_id
+                    else:  # 2) el que reaparece en una ronda posterior
+                        for tid in (home.team_id, away.team_id):
+                            if appears_later.get(tid, 0) > order:
+                                winner = tid
             matches.append(
                 Match(
                     id=gid,

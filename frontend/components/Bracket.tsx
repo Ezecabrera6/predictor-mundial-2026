@@ -44,14 +44,23 @@ export default function Bracket({ matches, predictions, played }: Props) {
     const isReal = m.finished && (!pm || !pm.live);
 
     const scorers = [...m.home_scorers, ...m.away_scorers];
+    const predScorers =
+      !isReal && !decided && pred?.pred_score
+        ? [
+            ...(pred.home_scorers_likely ?? []),
+            ...(pred.away_scorers_likely ?? []),
+          ].filter(Boolean)
+        : [];
 
     let meta: React.ReactNode = null;
     if (isReal && m.score) {
-      meta = <span className="played">Fin · {m.score}</span>;
+      meta = <span className="played">Fin Â· {m.score}</span>;
     } else if (pm && pm.live) {
       meta = "simulado";
     } else if (pred) {
-      meta = `favorito: ${pred.favorite}`;
+      meta = pred.pred_score
+        ? `favorito: ${pred.favorite} Â· previsto ${pred.pred_score}`
+        : `favorito: ${pred.favorite}`;
     }
 
     return (
@@ -70,7 +79,10 @@ export default function Bracket({ matches, predictions, played }: Props) {
         />
         {meta && <div className="meta">{meta}</div>}
         {isReal && scorers.length > 0 && (
-          <div className="scorers">⚽ {scorers.join(" · ")}</div>
+          <div className="scorers">âš½ {scorers.join(" Â· ")}</div>
+        )}
+        {predScorers.length > 0 && (
+          <div className="scorers pred">âš½ prob. {predScorers.join(" Â· ")}</div>
         )}
       </div>
     );

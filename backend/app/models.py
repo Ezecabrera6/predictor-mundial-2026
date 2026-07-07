@@ -13,7 +13,7 @@ class Player(BaseModel):
     name: str
     position: Literal["GK", "DEF", "MID", "FWD"] = "MID"
     importance: float = Field(0.5, ge=0.0, le=1.0)  # 0 suplente, 1 figura
-    fitness: float = Field(1.0, ge=0.0, le=1.0)      # 1 pleno, 0 recién vuelto
+    fitness: float = Field(1.0, ge=0.0, le=1.0)      # 1 pleno, 0 reciÃ©n vuelto
     injured: bool = False
 
 
@@ -32,12 +32,12 @@ class Team(BaseModel):
     matches_last_30: int = 4
     recent_form: list[Literal["W", "D", "L"]] = Field(default_factory=list)
 
-    # Capa manual (overrides.json): lesiones y estado anímico
+    # Capa manual (overrides.json): lesiones y estado anÃ­mico
     players: list[Player] = Field(default_factory=list)
     morale: float = Field(0.0, ge=-1.0, le=1.0)  # -1 crisis, +1 euforia
     note: str = ""
 
-    # Corrección aprendida por calibración (ajuste de rating por equipo)
+    # CorrecciÃ³n aprendida por calibraciÃ³n (ajuste de rating por equipo)
     correction: float = 0.0
 
 
@@ -99,7 +99,10 @@ class MatchPrediction(BaseModel):
     away_win_prob: float
     favorite: str
     finished: bool = False
-    played_result: str | None = None          # si ya se jugó, "2-1"
+    played_result: str | None = None          # si ya se jugÃ³, "2-1"
+    pred_score: str | None = None             # marcador previsto (no jugados)
+    home_scorers_likely: list[str] = Field(default_factory=list)
+    away_scorers_likely: list[str] = Field(default_factory=list)
 
 
 class SimulationResult(BaseModel):
@@ -112,3 +115,11 @@ class SimulationResult(BaseModel):
     reach_final: float
     win_cup: float
     champion_pct: float                        # alias legible de win_cup en %
+
+
+class ScorerRow(BaseModel):
+    name: str
+    code: str = ""            # fifa_code del equipo
+    team: str = ""            # nombre del equipo
+    goals_now: int = 0        # goles ya marcados en el torneo (seguros)
+    exp_goals: float = 0.0    # goles totales esperados (reales + futuros)
