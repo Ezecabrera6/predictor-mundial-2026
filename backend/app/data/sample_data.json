@@ -1,0 +1,41 @@
+{
+  "teams": [
+    {"id": 1, "name": "Argentina", "code": "ARG", "is_host": false, "base_rating": 1680, "rest_days": 4, "matches_last_30": 4, "recent_form": ["W","W","W","D"], "morale": 0.4, "players": [{"name":"Lionel Messi","position":"FWD","importance":1.0,"fitness":0.85,"injured":false},{"name":"Lisandro Martinez","position":"DEF","importance":0.75,"fitness":0.6,"injured":true}]},
+    {"id": 2, "name": "France", "code": "FRA", "is_host": false, "base_rating": 1665, "rest_days": 3, "matches_last_30": 5, "recent_form": ["W","W","L","W"], "morale": 0.35, "players": [{"name":"Aurelien Tchouameni","position":"MID","importance":0.75,"fitness":0.8,"injured":true}]},
+    {"id": 3, "name": "Brazil", "code": "BRA", "is_host": false, "base_rating": 1650, "rest_days": 5, "matches_last_30": 4, "recent_form": ["W","D","W","W"], "morale": 0.2, "players": []},
+    {"id": 4, "name": "Spain", "code": "ESP", "is_host": false, "base_rating": 1640, "rest_days": 4, "matches_last_30": 4, "recent_form": ["W","W","W","W"], "morale": 0.3, "players": [{"name":"Pedri","position":"MID","importance":0.85,"fitness":0.75,"injured":false}]},
+    {"id": 5, "name": "England", "code": "ENG", "is_host": false, "base_rating": 1620, "rest_days": 3, "matches_last_30": 5, "recent_form": ["W","D","W","D"], "morale": 0.2, "players": [{"name":"Bukayo Saka","position":"FWD","importance":0.8,"fitness":0.6,"injured":true}]},
+    {"id": 6, "name": "Portugal", "code": "POR", "is_host": false, "base_rating": 1600, "rest_days": 4, "matches_last_30": 5, "recent_form": ["W","W","L","W"], "morale": 0.1, "players": [{"name":"Cristiano Ronaldo","position":"FWD","importance":0.8,"fitness":0.85,"injured":false}]},
+    {"id": 7, "name": "Netherlands", "code": "NED", "is_host": false, "base_rating": 1560, "rest_days": 5, "matches_last_30": 4, "recent_form": ["W","D","W","D"], "morale": 0.0, "players": [{"name":"Frenkie de Jong","position":"MID","importance":0.85,"fitness":0.5,"injured":true}]},
+    {"id": 8, "name": "Germany", "code": "GER", "is_host": false, "base_rating": 1545, "rest_days": 4, "matches_last_30": 4, "recent_form": ["W","W","D","L"], "morale": 0.0, "players": []},
+    {"id": 9, "name": "Croatia", "code": "CRO", "is_host": false, "base_rating": 1500, "rest_days": 3, "matches_last_30": 5, "recent_form": ["D","W","D","L"], "morale": -0.1, "players": []},
+    {"id": 10, "name": "Belgium", "code": "BEL", "is_host": false, "base_rating": 1500, "rest_days": 4, "matches_last_30": 4, "recent_form": ["W","L","W","D"], "morale": -0.1, "players": [{"name":"Kevin De Bruyne","position":"MID","importance":0.95,"fitness":0.8,"injured":false}]},
+    {"id": 11, "name": "Uruguay", "code": "URU", "is_host": false, "base_rating": 1480, "rest_days": 4, "matches_last_30": 4, "recent_form": ["W","W","D","W"], "morale": 0.1, "players": []},
+    {"id": 12, "name": "Morocco", "code": "MAR", "is_host": false, "base_rating": 1470, "rest_days": 5, "matches_last_30": 4, "recent_form": ["W","W","W","D"], "morale": 0.3, "players": []},
+    {"id": 13, "name": "United States", "code": "USA", "is_host": true, "base_rating": 1440, "rest_days": 5, "matches_last_30": 4, "recent_form": ["W","D","W","W"], "morale": 0.3, "players": []},
+    {"id": 14, "name": "Mexico", "code": "MEX", "is_host": true, "base_rating": 1420, "rest_days": 4, "matches_last_30": 4, "recent_form": ["W","D","L","W"], "morale": 0.1, "players": []},
+    {"id": 15, "name": "Japan", "code": "JPN", "is_host": false, "base_rating": 1420, "rest_days": 4, "matches_last_30": 4, "recent_form": ["W","W","D","W"], "morale": 0.1, "players": []},
+    {"id": 16, "name": "Senegal", "code": "SEN", "is_host": false, "base_rating": 1440, "rest_days": 3, "matches_last_30": 5, "recent_form": ["D","W","L","W"], "morale": 0.0, "players": []}
+  ],
+  "matches": [
+    {"id": "R1", "round": "r16", "home": {"team_id": 1}, "away": {"team_id": 15}, "finished": true,  "winner_id": 1, "home_score": 2, "away_score": 1},
+    {"id": "R2", "round": "r16", "home": {"team_id": 7}, "away": {"team_id": 9}, "finished": false},
+    {"id": "R3", "round": "r16", "home": {"team_id": 2}, "away": {"team_id": 16}, "finished": true, "winner_id": 2, "home_score": 3, "away_score": 0},
+    {"id": "R4", "round": "r16", "home": {"team_id": 5}, "away": {"team_id": 10}, "finished": false},
+    {"id": "R5", "round": "r16", "home": {"team_id": 3}, "away": {"team_id": 14}, "finished": false},
+    {"id": "R6", "round": "r16", "home": {"team_id": 6}, "away": {"team_id": 12}, "finished": false},
+    {"id": "R7", "round": "r16", "home": {"team_id": 4}, "away": {"team_id": 11}, "finished": false},
+    {"id": "R8", "round": "r16", "home": {"team_id": 8}, "away": {"team_id": 13}, "finished": false},
+
+    {"id": "Q1", "round": "qf", "home": {"source": "R1", "take": "W"}, "away": {"source": "R2", "take": "W"}, "finished": false},
+    {"id": "Q2", "round": "qf", "home": {"source": "R3", "take": "W"}, "away": {"source": "R4", "take": "W"}, "finished": false},
+    {"id": "Q3", "round": "qf", "home": {"source": "R5", "take": "W"}, "away": {"source": "R6", "take": "W"}, "finished": false},
+    {"id": "Q4", "round": "qf", "home": {"source": "R7", "take": "W"}, "away": {"source": "R8", "take": "W"}, "finished": false},
+
+    {"id": "S1", "round": "sf", "home": {"source": "Q1", "take": "W"}, "away": {"source": "Q2", "take": "W"}, "finished": false},
+    {"id": "S2", "round": "sf", "home": {"source": "Q3", "take": "W"}, "away": {"source": "Q4", "take": "W"}, "finished": false},
+
+    {"id": "T1", "round": "third", "home": {"source": "S1", "take": "L"}, "away": {"source": "S2", "take": "L"}, "finished": false},
+    {"id": "F1", "round": "final", "home": {"source": "S1", "take": "W"}, "away": {"source": "S2", "take": "W"}, "finished": false}
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "_comment": "Capa MANUAL de LESIONES y estado físico (el API no las trae). La MORAL ya NO se carga acá: se calcula sola desde los resultados reales (ver morale.py). Editá cada equipo por su fifa_code. importance 0-1 (qué tan clave es), fitness 0-1 (1 = pleno), injured true/false. 'morale_nudge' (-1..1) es un ajuste fino opcional sobre la moral calculada.",
+
+  "ARG": {
+    "note": "Campeón defensor.",
+    "players": [
+      {"name": "Lionel Messi", "position": "FWD", "importance": 1.0, "fitness": 0.85, "injured": false},
+      {"name": "Lisandro Martinez", "position": "DEF", "importance": 0.75, "fitness": 0.6, "injured": true}
+    ]
+  },
+  "ESP": {
+    "players": [
+      {"name": "Pedri", "position": "MID", "importance": 0.85, "fitness": 0.75, "injured": false}
+    ]
+  },
+  "POR": {
+    "players": [
+      {"name": "Cristiano Ronaldo", "position": "FWD", "importance": 0.8, "fitness": 0.85, "injured": false}
+    ]
+  },
+  "ENG": {
+    "players": [
+      {"name": "Bukayo Saka", "position": "FWD", "importance": 0.8, "fitness": 0.6, "injured": true}
+    ]
+  },
+  "FRA": {
+    "players": [
+      {"name": "Aurelien Tchouameni", "position": "MID", "importance": 0.75, "fitness": 0.8, "injured": true}
+    ]
+  },
+  "BEL": {
+    "players": [
+      {"name": "Kevin De Bruyne", "position": "MID", "importance": 0.95, "fitness": 0.8, "injured": false}
+    ]
+  }
+}

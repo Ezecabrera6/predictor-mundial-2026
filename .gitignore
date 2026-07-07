@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+backend/.env
+backend/.token_cache.txt
+
+# Node / Next
+node_modules/
+.next/
+out/
+frontend/.env*.local
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
