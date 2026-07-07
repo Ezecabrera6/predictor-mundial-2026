@@ -1,7 +1,19 @@
 // Tipos y cliente del backend del predictor.
 
-export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+// URL del backend. Prioridad:
+// 1) NEXT_PUBLIC_API_URL si se define (dev).
+// 2) En el navegador, se deriva del host actual -> http://<host>:8000.
+//    Así, entrando desde cualquier IP/dispositivo de la LAN, apunta solo.
+// 3) Fallback local.
+export function apiBase(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
+  if (typeof window !== "undefined") {
+    return `${window.location.protocol}//${window.location.hostname}:8000`;
+  }
+  return "http://127.0.0.1:8000";
+}
+
+export const API_URL = apiBase();
 
 export type TeamRef = {
   id: number | null;
@@ -109,7 +121,7 @@ export async function fetchOverview(
   const params = new URLSearchParams({ n: String(n) });
   if (replayFrom) params.set("replay_from", replayFrom);
   if (refresh) params.set("refresh", "true");
-  const res = await fetch(`${API_URL}/api/overview?${params.toString()}`, {
+  const res = await fetch(`${apiBase()}/api/overview?${params.toString()}`, {
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`API ${res.status}`);
@@ -125,7 +137,7 @@ export async function recalibrate(target = 1.0): Promise<{
   iterations: number;
   corrections: { code: string; name: string; adj: number }[];
 }> {
-  const res = await fetch(`${API_URL}/api/recalibrate?target=${target}`, {
+  const res = await fetch(`${apiBase()}/api/recalibrate?target=${target}`, {
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`recalibrate ${res.status}`);
